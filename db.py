@@ -1,35 +1,47 @@
 import os
 
-from sqlalchemy import JSON, Integer
+from sqlalchemy import Integer, Text, String, Column
 from sqlalchemy.ext.asyncio import AsyncAttrs, async_sessionmaker, create_async_engine
-from sqlalchemy.orm import DeclarativeBase, MappedColumn, mapped_column
+from sqlalchemy.orm import DeclarativeBase
 
-POSTGRES_USER = os.getenv("POSTGRES_USER", "swapi")
-POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "secret")
-POSTGRES_DB = os.getenv("POSTGRES_DB", "swapi")
-POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
+POSTGRES_USER = os.getenv("POSTGRES_USER")
+POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
+POSTGRES_DB = os.getenv("POSTGRES_DB")
+POSTGRES_HOST = os.getenv("POSTGRES_HOST")
 POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5431")
 
-PG_DSN = f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}"
+PG_DSN = f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
 
 engine = create_async_engine(PG_DSN)
-DbSession = async_sessionmaker(engine, expire_on_commit=False)
+Session = async_sessionmaker(engine, expire_on_commit=False)
 
 
 class Base(DeclarativeBase, AsyncAttrs):
-    pass
+    id = Column(Integer, primary_key=True, autoincrement=True)
 
 
-class SwapiPeople(Base):
-    __tablename__ = "swapi"
+class SwapiPerson(Base):
 
-    id: MappedColumn[int] = mapped_column(Integer, primary_key=True)
-    json: MappedColumn[dict] = mapped_column(JSON)
+    __tablename__ = 'swapi'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    birth_year = Column(String)
+    eye_color = Column(String)
+    gender = Column(String)
+    hair_color = Column(String)
+    homeworld = Column(String)
+    mass = Column(String)
+    name = Column(String)
+    skin_color = Column(String)
+
+    def __repr__(self):
+        return(f'<SwapiPerson (id = {self.id}), name = "{self.name}">')
 
 
 async def init_orm():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        await conn.commit()
 
 
 async def close_orm():
