@@ -1,14 +1,16 @@
 import os
-
 from sqlalchemy import Integer, Text, String, Column
 from sqlalchemy.ext.asyncio import AsyncAttrs, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
+from dotenv import load_dotenv
 
-POSTGRES_USER = os.getenv("POSTGRES_USER", "user")
-POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "1234")
-POSTGRES_DB = os.getenv("POSTGRES_DB", "netology_swapi_db")
-POSTGRES_HOST = os.getenv("POSTGRES_HOST", "127.0.0.1")
-POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5431")
+load_dotenv()
+
+POSTGRES_USER = os.getenv("POSTGRES_USER")
+POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
+POSTGRES_DB = os.getenv("POSTGRES_DB")
+POSTGRES_HOST = os.getenv("POSTGRES_HOST")
+POSTGRES_PORT = os.getenv("POSTGRES_PORT")
 
 PG_DSN = f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
 
@@ -21,7 +23,6 @@ class Base(DeclarativeBase, AsyncAttrs):
 
 
 class SwapiPerson(Base):
-
     __tablename__ = 'swapi'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -35,7 +36,7 @@ class SwapiPerson(Base):
     skin_color = Column(String)
 
     def __repr__(self):
-        return(f'<SwapiPerson (name = "{self.name}")>')
+        return (f'<SwapiPerson (name = "{self.name}")>')
 
 
 async def init_orm():
